@@ -1,0 +1,35 @@
+# Visual Studio
+.vs/
+
+# Build
+[Bb]in/
+[Oo]bj/
+
+# NuGet restored packages
+packages/
+
+# User-specific Visual Studio files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# Logs
+*.log
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Test results
+TestResults/
+
+# NuGet
+*.nupkg
+*.snupkg

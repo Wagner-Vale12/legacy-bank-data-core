@@ -1,0 +1,32 @@
+@model LegacyBankDataCore.Web.Models.MovimentoViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Novo Movimento</title>
+</head>
+<body>
+    <h1>Novo Movimento</h1>
+
+    @using (Html.BeginForm("Novo", "Home", FormMethod.Post))
+    {
+        <p>
+            Id Externo:
+            @Html.TextBoxFor(model => model.IdExterno)
+        </p>
+
+        <p>
+            Conta:
+            @Html.TextBoxFor(model => model.Conta)
+        </p>
+
+        <p>
+            Tipo:
+            @Html.TextBoxFor(model => model.Tipo)
+        </p>
+
+        <button type="submit">Enviar</button>
+    }
+</body>
+</html>
