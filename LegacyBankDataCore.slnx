@@ -1,6 +1,15 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
+    <File Path="06_SP_IMPORTACAO_CRIAR.sql" />
+    <File Path="07_SP_IMPORTACAO_INICIAR_PROCESSAMENTO.sql" />
+    <File Path="08_SP_IMPORTACAO_CONCLUIR.sql" />
+    <File Path="09_SP_IMPORTACAO_REGISTRAR_ERRO.sql" />
+    <File Path="Database/Scripts/01_Create_Movimento.sql" />
+    <File Path="Database/Scripts/02_SP_MOVIMENTO_INSERIR.sql" />
+    <File Path="Database/Scripts/03_SP_MOVIMENTO_LISTAR.sql" />
+    <File Path="Database/Scripts/04_SP_MOVIMENTO_BUSCAR_POR_ID.sql" />
+    <File Path="Database/Scripts/05_Create_Importacao.sql" />
   </Folder>
   <Project Path="LegacyBankDataCore.Web/LegacyBankDataCore.Web.csproj" Id="0a72437f-41cd-436d-bf65-f92eb731c7d3" />
 </Solution>

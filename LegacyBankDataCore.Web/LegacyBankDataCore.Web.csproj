@@ -127,16 +127,22 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ImportacoesController.cs" />
     <Compile Include="Controllers\MovimentosController.cs" />
     <Compile Include="Exceptions\MovimentoDuplicadoException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CriarImportacaoRequest.cs" />
     <Compile Include="Models\CriarMovimentoRequest.cs" />
+    <Compile Include="Models\Importacao.cs" />
     <Compile Include="Models\Movimento.cs" />
     <Compile Include="Models\MovimentoViewModel.cs" />
+    <Compile Include="Models\RegistrarErroImportacaoRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\ImportacaoRepository.cs" />
     <Compile Include="Repositories\MovimentoRepository.cs" />
+    <Compile Include="Services\ImportacaoService.cs" />
     <Compile Include="Services\MovimentoService.cs" />
   </ItemGroup>
   <ItemGroup>
