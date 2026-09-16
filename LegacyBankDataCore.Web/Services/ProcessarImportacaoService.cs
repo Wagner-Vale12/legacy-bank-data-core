@@ -11,16 +11,20 @@ namespace LegacyBankDataCore.Web.Services
         private readonly XmlMovimentoReader _xmlReader;
         private readonly ProcessamentoImportacaoRepository _processamentoRepository;
 
+        private readonly HashArquivoService _hashArquivoService;
+
         public ProcessarImportacaoService(
             ImportacaoService importacaoService,
             MovimentoService movimentoService,
             XmlMovimentoReader xmlReader,
-            ProcessamentoImportacaoRepository processamentoRepository)
+            ProcessamentoImportacaoRepository processamentoRepository,
+            HashArquivoService hashArquivoService)
         {
             _importacaoService = importacaoService;
             _movimentoService = movimentoService;
             _xmlReader = xmlReader;
             _processamentoRepository = processamentoRepository;
+            _hashArquivoService = hashArquivoService;
         }
 
         public int Processar(string caminhoArquivo)
@@ -41,38 +45,52 @@ namespace LegacyBankDataCore.Web.Services
             var nomeArquivo =
                 Path.GetFileName(caminhoArquivo);
 
-            var importacaoId =
-                _importacaoService.Criar(nomeArquivo);
+            var hashArquivo =
+                _hashArquivoService.Calcular(caminhoArquivo);
 
-            _importacaoService
-                .IniciarProcessamento(importacaoId);
+            var importacaoId =
+                _importacaoService.Criar(
+                    nomeArquivo,
+                    hashArquivo);
+
+            var processamentoIniciado = false;
 
             try
             {
+                _importacaoService
+                    .IniciarProcessamento(importacaoId);
+
+                processamentoIniciado = true;
+
                 var movimentos =
                     _xmlReader.Ler(caminhoArquivo);
 
-                _movimentoService.ValidarLote(movimentos);
+                _movimentoService
+                    .ValidarLote(movimentos);
 
-                _processamentoRepository.PersistirEConcluir(
-                    importacaoId,
-                    movimentos);
+                _processamentoRepository
+                    .PersistirEConcluir(
+                        importacaoId,
+                        movimentos);
 
                 return importacaoId;
             }
             catch (Exception ex)
             {
-                var mensagemErro = ex.Message;
-
-                if (mensagemErro.Length > 1000)
+                if (processamentoIniciado)
                 {
-                    mensagemErro =
-                        mensagemErro.Substring(0, 1000);
-                }
+                    var mensagemErro = ex.Message;
 
-                _importacaoService.RegistrarErro(
-                    importacaoId,
-                    mensagemErro);
+                    if (mensagemErro.Length > 1000)
+                    {
+                        mensagemErro =
+                            mensagemErro.Substring(0, 1000);
+                    }
+
+                    _importacaoService.RegistrarErro(
+                        importacaoId,
+                        mensagemErro);
+                }
 
                 throw;
             }

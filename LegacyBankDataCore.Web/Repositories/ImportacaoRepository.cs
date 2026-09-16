@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LegacyBankDataCore.Web.Exceptions;
+using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -7,12 +8,12 @@ namespace LegacyBankDataCore.Web.Repositories
 {
     public class ImportacaoRepository
     {
-        public int Criar(string nomeArquivo)
+        public int Criar(string nomeArquivo, string hashArquivo)
         {
             var connectionString =
-                ConfigurationManager
-                    .ConnectionStrings["LegacyBankDataCore"]
-                    .ConnectionString;
+       ConfigurationManager
+           .ConnectionStrings["LegacyBankDataCore"]
+           .ConnectionString;
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -28,9 +29,21 @@ namespace LegacyBankDataCore.Web.Repositories
                         .Add("@NomeArquivo", SqlDbType.VarChar, 255)
                         .Value = nomeArquivo;
 
-                    var resultado = command.ExecuteScalar();
+                    command.Parameters
+                        .Add("@HashArquivo", SqlDbType.Char, 64)
+                        .Value = hashArquivo;
 
-                    return Convert.ToInt32(resultado);
+                    try
+                    {
+                        var resultado = command.ExecuteScalar();
+
+                        return Convert.ToInt32(resultado);
+                    }
+                    catch (SqlException ex)
+                        when (ex.Number == 2601 || ex.Number == 2627)
+                    {
+                        throw new ImportacaoDuplicadaException();
+                    }
                 }
             }
         }

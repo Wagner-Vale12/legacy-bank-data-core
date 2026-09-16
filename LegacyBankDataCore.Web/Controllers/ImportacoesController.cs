@@ -12,33 +12,6 @@ namespace LegacyBankDataCore.Web.Controllers
 {
     public class ImportacoesController : ApiController
     {
-        [HttpPost]
-        public IHttpActionResult Post(CriarImportacaoRequest request)
-        {
-            if (request == null)
-            {
-                return BadRequest("Dados da importação são obrigatórios.");
-            }
-
-            var repository = new ImportacaoRepository();
-            var service = new ImportacaoService(repository);
-
-            try
-            {
-                var id = service.Criar(request.NomeArquivo);
-
-                return Ok(new
-                {
-                    Id = id,
-                    Status = "RECEBIDA",
-                    Mensagem = "Importação registrada com sucesso."
-                });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
         [HttpPut]
         [Route("api/importacoes/{id:int}/iniciar")]
         public IHttpActionResult Iniciar(int id)
@@ -200,12 +173,16 @@ namespace LegacyBankDataCore.Web.Controllers
             var processamentoRepository =
                 new ProcessamentoImportacaoRepository();
 
+            var hashArquivoService =
+                new HashArquivoService();
+
             var processarService =
             new ProcessarImportacaoService(
             importacaoService,
             movimentoService,
             xmlReader,
-            processamentoRepository);
+            processamentoRepository,
+            hashArquivoService);
 
             try
             {
@@ -225,6 +202,15 @@ namespace LegacyBankDataCore.Web.Controllers
             {
                 return Content(
                     HttpStatusCode.NotFound,
+                    new
+                    {
+                        Message = ex.Message
+                    });
+            }
+            catch (ImportacaoDuplicadaException ex)
+            {
+                return Content(
+                    HttpStatusCode.Conflict,
                     new
                     {
                         Message = ex.Message

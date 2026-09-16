@@ -5,6 +5,8 @@
     <File Path="07_SP_IMPORTACAO_INICIAR_PROCESSAMENTO.sql" />
     <File Path="08_SP_IMPORTACAO_CONCLUIR.sql" />
     <File Path="09_SP_IMPORTACAO_REGISTRAR_ERRO.sql" />
+    <File Path="10_Add_Hash_Importacao.sql" />
+    <File Path="11_Alter_SP_IMPORTACAO_CRIAR_Hash.sql" />
     <File Path="Database/Scripts/01_Create_Movimento.sql" />
     <File Path="Database/Scripts/02_SP_MOVIMENTO_INSERIR.sql" />
     <File Path="Database/Scripts/03_SP_MOVIMENTO_LISTAR.sql" />

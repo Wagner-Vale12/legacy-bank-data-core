@@ -15,6 +15,7 @@ namespace LegacyBankDataCore.Tests
                 null,
                 null,
                 null,
+                null,
                 null);
 
             var caminhoArquivo =

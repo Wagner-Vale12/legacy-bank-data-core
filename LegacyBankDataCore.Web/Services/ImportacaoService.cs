@@ -12,7 +12,7 @@ namespace LegacyBankDataCore.Web.Services
             _repository = repository;
         }
 
-        public int Criar(string nomeArquivo)
+        public int Criar(string nomeArquivo, string hashArquivo)
         {
             if (string.IsNullOrWhiteSpace(nomeArquivo))
             {
@@ -26,7 +26,21 @@ namespace LegacyBankDataCore.Web.Services
                     "Nome do arquivo não pode ultrapassar 255 caracteres.");
             }
 
-            return _repository.Criar(nomeArquivo);
+            if (string.IsNullOrWhiteSpace(hashArquivo))
+            {
+                throw new ArgumentException(
+                    "Hash do arquivo é obrigatório.");
+            }
+
+            if (hashArquivo.Length != 64)
+            {
+                throw new ArgumentException(
+                    "Hash do arquivo deve possuir 64 caracteres.");
+            }
+
+            return _repository.Criar(
+                nomeArquivo,
+                hashArquivo);
         }
         public void IniciarProcessamento(int id)
         {
