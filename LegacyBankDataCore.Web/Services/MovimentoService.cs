@@ -24,6 +24,15 @@ namespace LegacyBankDataCore.Web.Services
         }
         public int Criar(CriarMovimentoRequest request)
         {
+            Validar(request);
+
+            var id = _repository.Inserir(request);
+
+            return id;
+        }
+
+        private void Validar(CriarMovimentoRequest request)
+        {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
@@ -31,27 +40,48 @@ namespace LegacyBankDataCore.Web.Services
 
             if (string.IsNullOrWhiteSpace(request.IdExterno))
             {
-                throw new ArgumentException("IdExterno é obrigatório.");
+                throw new ArgumentException(
+                    "IdExterno é obrigatório.");
             }
 
             if (string.IsNullOrWhiteSpace(request.Conta))
             {
-                throw new ArgumentException("Conta é obrigatória.");
+                throw new ArgumentException(
+                    "Conta é obrigatória.");
             }
 
-            if (request.Tipo != "ENTRADA" && request.Tipo != "SAIDA")
+            if (request.Tipo != "ENTRADA" &&
+                request.Tipo != "SAIDA")
             {
-                throw new ArgumentException("Tipo deve ser ENTRADA ou SAIDA.");
+                throw new ArgumentException(
+                    "Tipo deve ser ENTRADA ou SAIDA.");
             }
 
             if (request.Valor <= 0)
             {
-                throw new ArgumentException("Valor deve ser maior que zero.");
+                throw new ArgumentException(
+                    "Valor deve ser maior que zero.");
+            }
+        }
+        public int CriarLote(List<CriarMovimentoRequest> movimentos)
+        {
+            if (movimentos == null)
+            {
+                throw new ArgumentNullException(nameof(movimentos));
             }
 
-            var id = _repository.Inserir(request);
+            if (movimentos.Count == 0)
+            {
+                throw new ArgumentException(
+                    "A lista de movimentos não pode estar vazia.");
+            }
 
-            return id;
+            foreach (var movimento in movimentos)
+            {
+                Validar(movimento);
+            }
+
+            return _repository.InserirLote(movimentos);
         }
     }
 }

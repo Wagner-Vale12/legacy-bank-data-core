@@ -177,6 +177,86 @@ namespace LegacyBankDataCore.Web.Repositories
                 }
             }
         }
+        public int InserirLote(List<CriarMovimentoRequest> movimentos)
+        {
+            var connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["LegacyBankDataCore"]
+                    .ConnectionString;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        var totalInseridos = 0;
+
+                        foreach (var request in movimentos)
+                        {
+                            using (var command = new SqlCommand(
+                                "dbo.SP_MOVIMENTO_INSERIR",
+                                connection,
+                                transaction))
+                            {
+                                command.CommandType =
+                                    CommandType.StoredProcedure;
+
+                                command.Parameters
+                                    .Add("@IdExterno", SqlDbType.VarChar, 50)
+                                    .Value = request.IdExterno;
+
+                                command.Parameters
+                                    .Add("@Conta", SqlDbType.VarChar, 30)
+                                    .Value = request.Conta;
+
+                                command.Parameters
+                                    .Add("@Tipo", SqlDbType.VarChar, 10)
+                                    .Value = request.Tipo;
+
+                                var valorParameter =
+                                    command.Parameters.Add(
+                                        "@Valor",
+                                        SqlDbType.Decimal);
+
+                                valorParameter.Precision = 18;
+                                valorParameter.Scale = 2;
+                                valorParameter.Value = request.Valor;
+
+                                command.Parameters
+                                    .Add("@DataMovimento", SqlDbType.Date)
+                                    .Value = request.DataMovimento;
+
+                                try
+                                {
+                                    command.ExecuteScalar();
+
+                                    totalInseridos++;
+                                }
+                                catch (SqlException ex)
+                                    when (ex.Number == 2627 ||
+                                          ex.Number == 2601)
+                                {
+                                    throw new MovimentoDuplicadoException();
+                                }
+                            }
+                        }
+
+                        transaction.Commit();
+
+                        return totalInseridos;
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+
+                        throw;
+                    }
+                }
+            }
+        }
     }
 }
 

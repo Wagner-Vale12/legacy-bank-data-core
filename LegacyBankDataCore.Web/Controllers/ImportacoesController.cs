@@ -1,9 +1,12 @@
-﻿using System;
-using System.Web.Http;
-using System.Net;
+﻿using LegacyBankDataCore.Web.Exceptions;
 using LegacyBankDataCore.Web.Models;
 using LegacyBankDataCore.Web.Repositories;
 using LegacyBankDataCore.Web.Services;
+using System;
+using System.IO;
+using System.Net;
+using System.Web.Hosting;
+using System.Web.Http;
 
 namespace LegacyBankDataCore.Web.Controllers
 {
@@ -145,6 +148,96 @@ namespace LegacyBankDataCore.Web.Controllers
                         Message = ex.Message
                     }
                 );
+            }
+        }
+        [HttpPost]
+        [Route("api/importacoes/processar")]
+        public IHttpActionResult Processar(
+    ProcessarImportacaoRequest request)
+        {
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.NomeArquivo))
+            {
+                return BadRequest(
+                    "Nome do arquivo é obrigatório.");
+            }
+
+            var nomeArquivo =
+                Path.GetFileName(request.NomeArquivo);
+
+            if (nomeArquivo != request.NomeArquivo)
+            {
+                return BadRequest(
+                    "Nome do arquivo inválido.");
+            }
+
+            var pastaImportacoes =
+                HostingEnvironment.MapPath(
+                    "~/App_Data/Importacoes");
+
+            var caminhoArquivo =
+                Path.Combine(
+                    pastaImportacoes,
+                    nomeArquivo);
+
+            var importacaoRepository =
+                new ImportacaoRepository();
+
+            var movimentoRepository =
+                new MovimentoRepository();
+
+            var importacaoService =
+                new ImportacaoService(
+                    importacaoRepository);
+
+            var movimentoService =
+                new MovimentoService(
+                    movimentoRepository);
+
+            var xmlReader =
+                new XmlMovimentoReader();
+
+            var processarService =
+                new ProcessarImportacaoService(
+                    importacaoService,
+                    movimentoService,
+                    xmlReader);
+
+            try
+            {
+                var importacaoId =
+                    processarService.Processar(
+                        caminhoArquivo);
+
+                return Ok(new
+                {
+                    Id = importacaoId,
+                    Status = "CONCLUIDA",
+                    Mensagem =
+                        "Arquivo processado com sucesso."
+                });
+            }
+            catch (FileNotFoundException ex)
+            {
+                return Content(
+                    HttpStatusCode.NotFound,
+                    new
+                    {
+                        Message = ex.Message
+                    });
+            }
+            catch (MovimentoDuplicadoException ex)
+            {
+                return Content(
+                    HttpStatusCode.Conflict,
+                    new
+                    {
+                        Message = ex.Message
+                    });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

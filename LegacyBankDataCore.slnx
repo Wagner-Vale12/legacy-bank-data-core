@@ -11,5 +11,6 @@
     <File Path="Database/Scripts/04_SP_MOVIMENTO_BUSCAR_POR_ID.sql" />
     <File Path="Database/Scripts/05_Create_Importacao.sql" />
   </Folder>
+  <Project Path="LegacyBankDataCore.Tests/LegacyBankDataCore.Tests.csproj" Id="3c3b3736-bf26-45ff-8842-0c1f39131e8a" />
   <Project Path="LegacyBankDataCore.Web/LegacyBankDataCore.Web.csproj" Id="0a72437f-41cd-436d-bf65-f92eb731c7d3" />
 </Solution>
