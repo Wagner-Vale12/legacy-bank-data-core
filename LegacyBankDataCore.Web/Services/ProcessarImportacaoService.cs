@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using LegacyBankDataCore.Web.Repositories;
 
 namespace LegacyBankDataCore.Web.Services
 {
@@ -8,15 +9,18 @@ namespace LegacyBankDataCore.Web.Services
         private readonly ImportacaoService _importacaoService;
         private readonly MovimentoService _movimentoService;
         private readonly XmlMovimentoReader _xmlReader;
+        private readonly ProcessamentoImportacaoRepository _processamentoRepository;
 
         public ProcessarImportacaoService(
             ImportacaoService importacaoService,
             MovimentoService movimentoService,
-            XmlMovimentoReader xmlReader)
+            XmlMovimentoReader xmlReader,
+            ProcessamentoImportacaoRepository processamentoRepository)
         {
             _importacaoService = importacaoService;
             _movimentoService = movimentoService;
             _xmlReader = xmlReader;
+            _processamentoRepository = processamentoRepository;
         }
 
         public int Processar(string caminhoArquivo)
@@ -48,12 +52,11 @@ namespace LegacyBankDataCore.Web.Services
                 var movimentos =
                     _xmlReader.Ler(caminhoArquivo);
 
-                var totalInseridos =
-                    _movimentoService.CriarLote(movimentos);
+                _movimentoService.ValidarLote(movimentos);
 
-                _importacaoService.Concluir(
+                _processamentoRepository.PersistirEConcluir(
                     importacaoId,
-                    totalInseridos);
+                    movimentos);
 
                 return importacaoId;
             }

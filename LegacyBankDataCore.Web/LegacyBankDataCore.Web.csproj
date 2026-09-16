@@ -121,7 +121,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Data\Importacoes\movimentos_exemplo.xml" />
+    <Content Include="App_Data\Importacoes\movimentos_falha_conclusao.xml" />
     <Content Include="App_Data\Importacoes\movimentos_rollback.xml" />
+    <Content Include="App_Data\Importacoes\movimentos_transacao.xml" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -145,6 +147,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ImportacaoRepository.cs" />
     <Compile Include="Repositories\MovimentoRepository.cs" />
+    <Compile Include="Repositories\ProcessamentoImportacaoRepository.cs" />
     <Compile Include="Services\ImportacaoService.cs" />
     <Compile Include="Services\MovimentoService.cs" />
     <Compile Include="Services\ProcessarImportacaoService.cs" />

@@ -197,11 +197,15 @@ namespace LegacyBankDataCore.Web.Controllers
             var xmlReader =
                 new XmlMovimentoReader();
 
+            var processamentoRepository =
+                new ProcessamentoImportacaoRepository();
+
             var processarService =
-                new ProcessarImportacaoService(
-                    importacaoService,
-                    movimentoService,
-                    xmlReader);
+            new ProcessarImportacaoService(
+            importacaoService,
+            movimentoService,
+            xmlReader,
+            processamentoRepository);
 
             try
             {

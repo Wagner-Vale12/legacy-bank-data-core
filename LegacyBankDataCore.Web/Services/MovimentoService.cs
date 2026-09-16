@@ -65,6 +65,12 @@ namespace LegacyBankDataCore.Web.Services
         }
         public int CriarLote(List<CriarMovimentoRequest> movimentos)
         {
+            ValidarLote(movimentos);
+
+            return _repository.InserirLote(movimentos);
+        }
+        public void ValidarLote(List<CriarMovimentoRequest> movimentos)
+        {
             if (movimentos == null)
             {
                 throw new ArgumentNullException(nameof(movimentos));
@@ -80,8 +86,6 @@ namespace LegacyBankDataCore.Web.Services
             {
                 Validar(movimento);
             }
-
-            return _repository.InserirLote(movimentos);
         }
     }
 }

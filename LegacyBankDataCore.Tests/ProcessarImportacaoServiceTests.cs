@@ -14,6 +14,7 @@ namespace LegacyBankDataCore.Tests
             var service = new ProcessarImportacaoService(
                 null,
                 null,
+                null,
                 null);
 
             var caminhoArquivo =

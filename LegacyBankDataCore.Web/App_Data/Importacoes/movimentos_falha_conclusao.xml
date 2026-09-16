@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Movimentos>
+	<Movimento>
+		<IdExterno>XML009</IdExterno>
+		<Conta>40001</Conta>
+		<Tipo>ENTRADA</Tipo>
+		<Valor>900.00</Valor>
+		<DataMovimento>2026-09-16</DataMovimento>
+	</Movimento>
+
+	<Movimento>
+		<IdExterno>XML010</IdExterno>
+		<Conta>40002</Conta>
+		<Tipo>SAIDA</Tipo>
+		<Valor>300.00</Valor>
+		<DataMovimento>2026-09-16</DataMovimento>
+	</Movimento>
+
+	<Movimento>
+		<IdExterno>XML011</IdExterno>
+		<Conta>40003</Conta>
+		<Tipo>ENTRADA</Tipo>
+		<Valor>1200.00</Valor>
+		<DataMovimento>2026-09-16</DataMovimento>
+	</Movimento>
+</Movimentos>
