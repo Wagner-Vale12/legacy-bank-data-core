@@ -1,4 +1,5 @@
 ﻿using System;
+using LegacyBankDataCore.Web.Models;
 using LegacyBankDataCore.Web.Repositories;
 
 namespace LegacyBankDataCore.Web.Services
@@ -112,5 +113,48 @@ namespace LegacyBankDataCore.Web.Services
                     "Não foi possível registrar erro na importação.");
             }
         }
+        public Importacao BuscarPorId(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentException(
+                    "Id da importação deve ser maior que zero.");
+            }
+
+            return _repository.BuscarPorId(id);
+        }
+    public void Reprocessar(int id)
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentException(
+                    "Id da importação deve ser maior que zero.");
+            }
+
+            var importacao =
+                _repository.BuscarPorId(id);
+
+            if (importacao == null)
+            {
+                throw new InvalidOperationException(
+                    "Importação não encontrada.");
+            }
+
+            if (importacao.Status != "ERRO")
+            {
+                throw new InvalidOperationException(
+                    "Somente importações com status ERRO podem ser reprocessadas.");
+            }
+
+            var reprocessado =
+                _repository.Reprocessar(id);
+
+            if (!reprocessado)
+            {
+                throw new InvalidOperationException(
+                    "Não foi possível iniciar o reprocessamento da importação.");
+            }
+        }
     }
+        
 }

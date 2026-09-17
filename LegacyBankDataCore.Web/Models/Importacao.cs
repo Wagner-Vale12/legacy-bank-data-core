@@ -17,5 +17,7 @@ namespace LegacyBankDataCore.Web.Models
         public DateTime? DataProcessamento { get; set; }
 
         public string MensagemErro { get; set; }
+
+        public string HashArquivo { get; set; }
     }
 }

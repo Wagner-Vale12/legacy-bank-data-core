@@ -1,4 +1,5 @@
 ﻿using LegacyBankDataCore.Web.Exceptions;
+using LegacyBankDataCore.Web.Models;
 using System;
 using System.Configuration;
 using System.Data;
@@ -137,6 +138,105 @@ namespace LegacyBankDataCore.Web.Repositories
                     var resultado = command.ExecuteScalar();
 
                     var linhasAfetadas = Convert.ToInt32(resultado);
+
+                    return linhasAfetadas == 1;
+                }
+            }
+        }
+        public Importacao BuscarPorId(int id)
+        {
+            var connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["LegacyBankDataCore"]
+                    .ConnectionString;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(
+                    "dbo.SP_IMPORTACAO_BUSCAR_POR_ID",
+                    connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters
+                        .Add("@Id", SqlDbType.Int)
+                        .Value = id;
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            return null;
+                        }
+
+                        return new Importacao
+                        {
+                            Id = reader.GetInt32(
+                                reader.GetOrdinal("Id")),
+
+                            NomeArquivo =
+                                reader["NomeArquivo"].ToString(),
+
+                            Status =
+                                reader["Status"].ToString(),
+
+                            TotalRegistros =
+                                reader.GetInt32(
+                                    reader.GetOrdinal("TotalRegistros")),
+
+                            DataRecebimento =
+                                reader.GetDateTime(
+                                    reader.GetOrdinal("DataRecebimento")),
+
+                            DataProcessamento =
+                                reader["DataProcessamento"] == DBNull.Value
+                                    ? (DateTime?)null
+                                    : reader.GetDateTime(
+                                        reader.GetOrdinal("DataProcessamento")),
+
+                            MensagemErro =
+                                reader["MensagemErro"] == DBNull.Value
+                                    ? null
+                                    : reader["MensagemErro"].ToString(),
+
+                            HashArquivo =
+                                reader["HashArquivo"] == DBNull.Value
+                                    ? null
+                                    : reader["HashArquivo"].ToString()
+                        };
+                    }
+                }
+            }
+        }
+        public bool Reprocessar(int id)
+        {
+            var connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["LegacyBankDataCore"]
+                    .ConnectionString;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(
+                    "dbo.SP_IMPORTACAO_REPROCESSAR",
+                    connection))
+                {
+                    command.CommandType =
+                        CommandType.StoredProcedure;
+
+                    command.Parameters
+                        .Add("@Id", SqlDbType.Int)
+                        .Value = id;
+
+                    var resultado =
+                        command.ExecuteScalar();
+
+                    var linhasAfetadas =
+                        Convert.ToInt32(resultado);
 
                     return linhasAfetadas == 1;
                 }

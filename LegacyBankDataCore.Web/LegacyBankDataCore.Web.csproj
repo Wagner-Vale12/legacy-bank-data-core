@@ -123,6 +123,7 @@
     <Content Include="App_Data\Importacoes\movimentos_exemplo.xml" />
     <Content Include="App_Data\Importacoes\movimentos_falha_conclusao.xml" />
     <Content Include="App_Data\Importacoes\movimentos_idempotencia.xml" />
+    <Content Include="App_Data\Importacoes\movimentos_reprocessamento.xml" />
     <Content Include="App_Data\Importacoes\movimentos_rollback.xml" />
     <Content Include="App_Data\Importacoes\movimentos_transacao.xml" />
     <Content Include="Global.asax" />

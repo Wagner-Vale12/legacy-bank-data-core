@@ -95,5 +95,106 @@ namespace LegacyBankDataCore.Web.Services
                 throw;
             }
         }
+        public int Reprocessar(
+    int importacaoId,
+    string caminhoArquivo)
+        {
+            if (importacaoId <= 0)
+            {
+                throw new ArgumentException(
+                    "Id da importação deve ser maior que zero.");
+            }
+
+            if (string.IsNullOrWhiteSpace(caminhoArquivo))
+            {
+                throw new ArgumentException(
+                    "Caminho do arquivo é obrigatório.");
+            }
+
+            if (!File.Exists(caminhoArquivo))
+            {
+                throw new FileNotFoundException(
+                    "Arquivo XML não encontrado.",
+                    caminhoArquivo);
+            }
+
+            var importacao =
+                _importacaoService.BuscarPorId(importacaoId);
+
+            if (importacao == null)
+            {
+                throw new InvalidOperationException(
+                    "Importação não encontrada.");
+            }
+
+            var nomeArquivo =
+                Path.GetFileName(caminhoArquivo);
+
+            if (!string.Equals(
+                importacao.NomeArquivo,
+                nomeArquivo,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "O arquivo informado não corresponde à importação.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(importacao.HashArquivo))
+            {
+                var hashAtual =
+                    _hashArquivoService.Calcular(caminhoArquivo);
+
+                if (!string.Equals(
+                    importacao.HashArquivo.Trim(),
+                    hashAtual,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        "O conteúdo do arquivo foi alterado desde a importação original.");
+                }
+            }
+
+            var reprocessamentoIniciado = false;
+
+            try
+            {
+                _importacaoService.Reprocessar(
+                    importacaoId);
+
+                reprocessamentoIniciado = true;
+
+                var movimentos =
+                    _xmlReader.Ler(caminhoArquivo);
+
+                _movimentoService
+                    .ValidarLote(movimentos);
+
+                _processamentoRepository
+                    .PersistirEConcluir(
+                        importacaoId,
+                        movimentos);
+
+                return importacaoId;
+            }
+            catch (Exception ex)
+            {
+                if (reprocessamentoIniciado)
+                {
+                    var mensagemErro = ex.Message;
+
+                    if (mensagemErro.Length > 1000)
+                    {
+                        mensagemErro =
+                            mensagemErro.Substring(0, 1000);
+                    }
+
+                    _importacaoService.RegistrarErro(
+                        importacaoId,
+                        mensagemErro);
+                }
+
+                throw;
+            }
+        }
     }
 }

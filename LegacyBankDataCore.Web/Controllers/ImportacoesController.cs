@@ -230,5 +230,105 @@ namespace LegacyBankDataCore.Web.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut]
+        [Route("api/importacoes/{id:int}/reprocessar")]
+        public IHttpActionResult Reprocessar(int id)
+        {
+            var importacaoRepository =
+                new ImportacaoRepository();
+
+            var movimentoRepository =
+                new MovimentoRepository();
+
+            var importacaoService =
+                new ImportacaoService(
+                    importacaoRepository);
+
+            var movimentoService =
+                new MovimentoService(
+                    movimentoRepository);
+
+            var xmlReader =
+                new XmlMovimentoReader();
+
+            var processamentoRepository =
+                new ProcessamentoImportacaoRepository();
+
+            var hashArquivoService =
+                new HashArquivoService();
+
+            try
+            {
+                var importacao =
+                    importacaoService.BuscarPorId(id);
+
+                if (importacao == null)
+                {
+                    return NotFound();
+                }
+
+                var pastaImportacoes =
+                    HostingEnvironment.MapPath(
+                        "~/App_Data/Importacoes");
+
+                var caminhoArquivo =
+                    Path.Combine(
+                        pastaImportacoes,
+                        importacao.NomeArquivo);
+
+                var processarService =
+                    new ProcessarImportacaoService(
+                        importacaoService,
+                        movimentoService,
+                        xmlReader,
+                        processamentoRepository,
+                        hashArquivoService);
+
+                var importacaoId =
+                    processarService.Reprocessar(
+                        id,
+                        caminhoArquivo);
+
+                return Ok(new
+                {
+                    Id = importacaoId,
+                    Status = "CONCLUIDA",
+                    Mensagem =
+                        "Importação reprocessada com sucesso."
+                });
+            }
+            catch (FileNotFoundException ex)
+            {
+                return Content(
+                    HttpStatusCode.NotFound,
+                    new
+                    {
+                        Message = ex.Message
+                    });
+            }
+            catch (MovimentoDuplicadoException ex)
+            {
+                return Content(
+                    HttpStatusCode.Conflict,
+                    new
+                    {
+                        Message = ex.Message
+                    });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Content(
+                    HttpStatusCode.Conflict,
+                    new
+                    {
+                        Message = ex.Message
+                    });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
