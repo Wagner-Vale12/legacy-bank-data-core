@@ -1,6 +1,7 @@
 ﻿using LegacyBankDataCore.Web.Exceptions;
 using LegacyBankDataCore.Web.Models;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -241,6 +242,73 @@ namespace LegacyBankDataCore.Web.Repositories
                     return linhasAfetadas == 1;
                 }
             }
+        }
+
+        public List<Importacao> Listar()
+        {
+            var importacoes = new List<Importacao>();
+
+            var connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["LegacyBankDataCore"]
+                    .ConnectionString;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(
+                    "dbo.SP_IMPORTACAO_LISTAR",
+                    connection))
+                {
+                    command.CommandType =
+                        CommandType.StoredProcedure;
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            importacoes.Add(new Importacao
+                            {
+                                Id = reader.GetInt32(
+                                    reader.GetOrdinal("Id")),
+
+                                NomeArquivo =
+                                    reader["NomeArquivo"].ToString(),
+
+                                Status =
+                                    reader["Status"].ToString(),
+
+                                TotalRegistros =
+                                    reader.GetInt32(
+                                        reader.GetOrdinal("TotalRegistros")),
+
+                                DataRecebimento =
+                                    reader.GetDateTime(
+                                        reader.GetOrdinal("DataRecebimento")),
+
+                                DataProcessamento =
+                                    reader["DataProcessamento"] == DBNull.Value
+                                        ? (DateTime?)null
+                                        : reader.GetDateTime(
+                                            reader.GetOrdinal("DataProcessamento")),
+
+                                MensagemErro =
+                                    reader["MensagemErro"] == DBNull.Value
+                                        ? null
+                                        : reader["MensagemErro"].ToString(),
+
+                                HashArquivo =
+                                    reader["HashArquivo"] == DBNull.Value
+                                        ? null
+                                        : reader["HashArquivo"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return importacoes;
         }
     }
 }

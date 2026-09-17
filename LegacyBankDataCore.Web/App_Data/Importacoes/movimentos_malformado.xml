@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Movimentos>
+	<Movimento>
+		<IdExterno>XML020</IdExterno>
+		<Conta>80001</Conta>
+		<Tipo>ENTRADA</Tipo>
+		<Valor>950.00</Valor>
+		<DataMovimento>2026-09-17</DataMovimento>
+
+		<!-- Fechamentos removidos de propósito -->

@@ -9,6 +9,7 @@
     <File Path="11_Alter_SP_IMPORTACAO_CRIAR_Hash.sql" />
     <File Path="12_SP_IMPORTACAO_BUSCAR_POR_ID.sql" />
     <File Path="13_SP_IMPORTACAO_REPROCESSAR.sql" />
+    <File Path="14_SP_IMPORTACAO_LISTAR.sql" />
     <File Path="Database/Scripts/01_Create_Movimento.sql" />
     <File Path="Database/Scripts/02_SP_MOVIMENTO_INSERIR.sql" />
     <File Path="Database/Scripts/03_SP_MOVIMENTO_LISTAR.sql" />

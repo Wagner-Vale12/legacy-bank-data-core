@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Web.Hosting;
 using LegacyBankDataCore.Web.Repositories;
 
 namespace LegacyBankDataCore.Web.Services
@@ -10,21 +11,23 @@ namespace LegacyBankDataCore.Web.Services
         private readonly MovimentoService _movimentoService;
         private readonly XmlMovimentoReader _xmlReader;
         private readonly ProcessamentoImportacaoRepository _processamentoRepository;
-
         private readonly HashArquivoService _hashArquivoService;
+        private readonly XmlSchemaValidator _xmlSchemaValidator;
 
         public ProcessarImportacaoService(
             ImportacaoService importacaoService,
             MovimentoService movimentoService,
             XmlMovimentoReader xmlReader,
             ProcessamentoImportacaoRepository processamentoRepository,
-            HashArquivoService hashArquivoService)
+            HashArquivoService hashArquivoService,
+            XmlSchemaValidator xmlSchemaValidator)
         {
             _importacaoService = importacaoService;
             _movimentoService = movimentoService;
             _xmlReader = xmlReader;
             _processamentoRepository = processamentoRepository;
             _hashArquivoService = hashArquivoService;
+            _xmlSchemaValidator = xmlSchemaValidator;
         }
 
         public int Processar(string caminhoArquivo)
@@ -46,7 +49,8 @@ namespace LegacyBankDataCore.Web.Services
                 Path.GetFileName(caminhoArquivo);
 
             var hashArquivo =
-                _hashArquivoService.Calcular(caminhoArquivo);
+                _hashArquivoService.Calcular(
+                    caminhoArquivo);
 
             var importacaoId =
                 _importacaoService.Criar(
@@ -61,6 +65,13 @@ namespace LegacyBankDataCore.Web.Services
                     .IniciarProcessamento(importacaoId);
 
                 processamentoIniciado = true;
+
+                var caminhoXsd =
+                    ObterCaminhoXsd();
+
+                _xmlSchemaValidator.Validar(
+                    caminhoArquivo,
+                    caminhoXsd);
 
                 var movimentos =
                     _xmlReader.Ler(caminhoArquivo);
@@ -79,25 +90,30 @@ namespace LegacyBankDataCore.Web.Services
             {
                 if (processamentoIniciado)
                 {
-                    var mensagemErro = ex.Message;
+                    var mensagemErro =
+                        ex.Message;
 
                     if (mensagemErro.Length > 1000)
                     {
                         mensagemErro =
-                            mensagemErro.Substring(0, 1000);
+                            mensagemErro.Substring(
+                                0,
+                                1000);
                     }
 
-                    _importacaoService.RegistrarErro(
-                        importacaoId,
-                        mensagemErro);
+                    _importacaoService
+                        .RegistrarErro(
+                            importacaoId,
+                            mensagemErro);
                 }
 
                 throw;
             }
         }
+
         public int Reprocessar(
-    int importacaoId,
-    string caminhoArquivo)
+            int importacaoId,
+            string caminhoArquivo)
         {
             if (importacaoId <= 0)
             {
@@ -119,7 +135,8 @@ namespace LegacyBankDataCore.Web.Services
             }
 
             var importacao =
-                _importacaoService.BuscarPorId(importacaoId);
+                _importacaoService
+                    .BuscarPorId(importacaoId);
 
             if (importacao == null)
             {
@@ -139,10 +156,12 @@ namespace LegacyBankDataCore.Web.Services
                     "O arquivo informado não corresponde à importação.");
             }
 
-            if (!string.IsNullOrWhiteSpace(importacao.HashArquivo))
+            if (!string.IsNullOrWhiteSpace(
+                importacao.HashArquivo))
             {
                 var hashAtual =
-                    _hashArquivoService.Calcular(caminhoArquivo);
+                    _hashArquivoService.Calcular(
+                        caminhoArquivo);
 
                 if (!string.Equals(
                     importacao.HashArquivo.Trim(),
@@ -158,10 +177,17 @@ namespace LegacyBankDataCore.Web.Services
 
             try
             {
-                _importacaoService.Reprocessar(
-                    importacaoId);
+                _importacaoService
+                    .Reprocessar(importacaoId);
 
                 reprocessamentoIniciado = true;
+
+                var caminhoXsd =
+                    ObterCaminhoXsd();
+
+                _xmlSchemaValidator.Validar(
+                    caminhoArquivo,
+                    caminhoXsd);
 
                 var movimentos =
                     _xmlReader.Ler(caminhoArquivo);
@@ -180,21 +206,42 @@ namespace LegacyBankDataCore.Web.Services
             {
                 if (reprocessamentoIniciado)
                 {
-                    var mensagemErro = ex.Message;
+                    var mensagemErro =
+                        ex.Message;
 
                     if (mensagemErro.Length > 1000)
                     {
                         mensagemErro =
-                            mensagemErro.Substring(0, 1000);
+                            mensagemErro.Substring(
+                                0,
+                                1000);
                     }
 
-                    _importacaoService.RegistrarErro(
-                        importacaoId,
-                        mensagemErro);
+                    _importacaoService
+                        .RegistrarErro(
+                            importacaoId,
+                            mensagemErro);
                 }
 
                 throw;
             }
+        }
+
+        private string ObterCaminhoXsd()
+        {
+            var caminhoXsd =
+                HostingEnvironment.MapPath(
+                    "~/App_Data/Schemas/movimentos.xsd");
+
+            if (string.IsNullOrWhiteSpace(caminhoXsd) ||
+                !File.Exists(caminhoXsd))
+            {
+                throw new FileNotFoundException(
+                    "Arquivo XSD não encontrado.",
+                    caminhoXsd);
+            }
+
+            return caminhoXsd;
         }
     }
 }

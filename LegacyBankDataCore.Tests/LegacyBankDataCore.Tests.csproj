@@ -53,6 +53,7 @@
     <Compile Include="ProcessarImportacaoServiceTests.cs" />
     <Compile Include="XmlMovimentoReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlSchemaValidatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

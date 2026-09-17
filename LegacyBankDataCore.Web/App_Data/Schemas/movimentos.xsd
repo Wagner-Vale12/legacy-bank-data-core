@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified">
+
+	<xs:element name="Movimentos">
+		<xs:complexType>
+			<xs:sequence>
+
+				<xs:element
+					name="Movimento"
+					minOccurs="1"
+					maxOccurs="unbounded">
+
+					<xs:complexType>
+						<xs:sequence>
+
+							<xs:element name="IdExterno">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1" />
+										<xs:maxLength value="50" />
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+
+							<xs:element name="Conta">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1" />
+										<xs:maxLength value="30" />
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+
+							<xs:element name="Tipo">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="ENTRADA" />
+										<xs:enumeration value="SAIDA" />
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+
+							<xs:element name="Valor">
+								<xs:simpleType>
+									<xs:restriction base="xs:decimal">
+										<xs:minExclusive value="0" />
+										<xs:fractionDigits value="2" />
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+
+							<xs:element
+								name="DataMovimento"
+								type="xs:date" />
+
+						</xs:sequence>
+					</xs:complexType>
+
+				</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

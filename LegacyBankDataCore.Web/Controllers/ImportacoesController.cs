@@ -41,20 +41,24 @@ namespace LegacyBankDataCore.Web.Controllers
                     new
                     {
                         Message = ex.Message
-                    }
-                );
+                    });
             }
         }
+
         [HttpPut]
         [Route("api/importacoes/{id:int}/concluir")]
-        public IHttpActionResult Concluir(int id, int totalRegistros)
+        public IHttpActionResult Concluir(
+            int id,
+            int totalRegistros)
         {
             var repository = new ImportacaoRepository();
             var service = new ImportacaoService(repository);
 
             try
             {
-                service.Concluir(id, totalRegistros);
+                service.Concluir(
+                    id,
+                    totalRegistros);
 
                 return Ok(new
                 {
@@ -75,15 +79,15 @@ namespace LegacyBankDataCore.Web.Controllers
                     new
                     {
                         Message = ex.Message
-                    }
-                );
+                    });
             }
         }
+
         [HttpPut]
         [Route("api/importacoes/{id:int}/erro")]
         public IHttpActionResult RegistrarErro(
-    int id,
-    RegistrarErroImportacaoRequest request)
+            int id,
+            RegistrarErroImportacaoRequest request)
         {
             if (request == null)
             {
@@ -91,8 +95,11 @@ namespace LegacyBankDataCore.Web.Controllers
                     "Dados do erro são obrigatórios.");
             }
 
-            var repository = new ImportacaoRepository();
-            var service = new ImportacaoService(repository);
+            var repository =
+                new ImportacaoRepository();
+
+            var service =
+                new ImportacaoService(repository);
 
             try
             {
@@ -105,7 +112,8 @@ namespace LegacyBankDataCore.Web.Controllers
                     Id = id,
                     Status = "ERRO",
                     MensagemErro = request.MensagemErro,
-                    Mensagem = "Erro registrado na importação com sucesso."
+                    Mensagem =
+                        "Erro registrado na importação com sucesso."
                 });
             }
             catch (ArgumentException ex)
@@ -119,24 +127,26 @@ namespace LegacyBankDataCore.Web.Controllers
                     new
                     {
                         Message = ex.Message
-                    }
-                );
+                    });
             }
         }
+
         [HttpPost]
         [Route("api/importacoes/processar")]
         public IHttpActionResult Processar(
-    ProcessarImportacaoRequest request)
+            ProcessarImportacaoRequest request)
         {
             if (request == null ||
-                string.IsNullOrWhiteSpace(request.NomeArquivo))
+                string.IsNullOrWhiteSpace(
+                    request.NomeArquivo))
             {
                 return BadRequest(
                     "Nome do arquivo é obrigatório.");
             }
 
             var nomeArquivo =
-                Path.GetFileName(request.NomeArquivo);
+                Path.GetFileName(
+                    request.NomeArquivo);
 
             if (nomeArquivo != request.NomeArquivo)
             {
@@ -176,13 +186,17 @@ namespace LegacyBankDataCore.Web.Controllers
             var hashArquivoService =
                 new HashArquivoService();
 
+            var xmlSchemaValidator =
+                new XmlSchemaValidator();
+
             var processarService =
-            new ProcessarImportacaoService(
-            importacaoService,
-            movimentoService,
-            xmlReader,
-            processamentoRepository,
-            hashArquivoService);
+                new ProcessarImportacaoService(
+                    importacaoService,
+                    movimentoService,
+                    xmlReader,
+                    processamentoRepository,
+                    hashArquivoService,
+                    xmlSchemaValidator);
 
             try
             {
@@ -258,6 +272,9 @@ namespace LegacyBankDataCore.Web.Controllers
             var hashArquivoService =
                 new HashArquivoService();
 
+            var xmlSchemaValidator =
+                new XmlSchemaValidator();
+
             try
             {
                 var importacao =
@@ -283,7 +300,8 @@ namespace LegacyBankDataCore.Web.Controllers
                         movimentoService,
                         xmlReader,
                         processamentoRepository,
-                        hashArquivoService);
+                        hashArquivoService,
+                        xmlSchemaValidator);
 
                 var importacaoId =
                     processarService.Reprocessar(
@@ -329,6 +347,52 @@ namespace LegacyBankDataCore.Web.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet]
+        [Route("api/importacoes/{id:int}")]
+        public IHttpActionResult BuscarPorId(int id)
+        {
+            var repository =
+                new ImportacaoRepository();
+
+            var service =
+                new ImportacaoService(
+                    repository);
+
+            try
+            {
+                var importacao =
+                    service.BuscarPorId(id);
+
+                if (importacao == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(importacao);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/importacoes")]
+        public IHttpActionResult Listar()
+        {
+            var repository =
+                new ImportacaoRepository();
+
+            var service =
+                new ImportacaoService(
+                    repository);
+
+            var importacoes =
+                service.Listar();
+
+            return Ok(importacoes);
         }
     }
 }

@@ -1,6 +1,7 @@
-﻿using System;
-using LegacyBankDataCore.Web.Models;
+﻿using LegacyBankDataCore.Web.Models;
 using LegacyBankDataCore.Web.Repositories;
+using System;
+using System.Collections.Generic;
 
 namespace LegacyBankDataCore.Web.Services
 {
@@ -154,6 +155,10 @@ namespace LegacyBankDataCore.Web.Services
                 throw new InvalidOperationException(
                     "Não foi possível iniciar o reprocessamento da importação.");
             }
+        }
+        public List<Importacao> Listar()
+        {
+            return _repository.Listar();
         }
     }
         
