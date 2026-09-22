@@ -87,5 +87,57 @@ namespace LegacyBankDataCore.Web.Services
                 Validar(movimento);
             }
         }
+        public MovimentoPaginadoResult ListarPaginado(
+            string termo,
+            string tipo,
+            int pagina,
+            int tamanhoPagina)
+                {
+            if (pagina < 1)
+            {
+                throw new ArgumentException(
+                    "Página deve ser maior ou igual a 1.");
+            }
+
+            if (tamanhoPagina < 1 || tamanhoPagina > 100)
+            {
+                throw new ArgumentException(
+                    "Tamanho da página deve estar entre 1 e 100.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(termo))
+            {
+                termo = termo.Trim();
+
+                if (termo.Length > 50)
+                {
+                    throw new ArgumentException(
+                        "Termo de pesquisa deve possuir no máximo 50 caracteres.");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(tipo))
+            {
+                tipo = tipo.Trim().ToUpperInvariant();
+
+                if (tipo == "TODOS")
+                {
+                    tipo = null;
+                }
+                else if (
+                    tipo != "ENTRADA" &&
+                    tipo != "SAIDA")
+                {
+                    throw new ArgumentException(
+                        "Tipo deve ser ENTRADA ou SAIDA.");
+                }
+            }
+
+            return _repository.ListarPaginado(
+                termo,
+                tipo,
+                pagina,
+                tamanhoPagina);
+        }
     }
 }

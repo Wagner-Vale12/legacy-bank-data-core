@@ -257,6 +257,105 @@ namespace LegacyBankDataCore.Web.Repositories
                 }
             }
         }
+        public MovimentoPaginadoResult ListarPaginado(
+    string termo,
+    string tipo,
+    int pagina,
+    int tamanhoPagina)
+        {
+            var connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["LegacyBankDataCore"]
+                    .ConnectionString;
+
+            var resultado =
+                new MovimentoPaginadoResult();
+
+            using (var connection =
+                new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(
+                    "dbo.SP_MOVIMENTO_LISTAR_PAGINADO",
+                    connection))
+                {
+                    command.CommandType =
+                        CommandType.StoredProcedure;
+
+                    command.Parameters
+                        .Add("@Termo", SqlDbType.VarChar, 50)
+                        .Value =
+                            string.IsNullOrWhiteSpace(termo)
+                                ? (object)DBNull.Value
+                                : termo;
+
+                    command.Parameters
+                        .Add("@Tipo", SqlDbType.VarChar, 10)
+                        .Value =
+                            string.IsNullOrWhiteSpace(tipo)
+                                ? (object)DBNull.Value
+                                : tipo;
+
+                    command.Parameters
+                        .Add("@Pagina", SqlDbType.Int)
+                        .Value = pagina;
+
+                    command.Parameters
+                        .Add("@TamanhoPagina", SqlDbType.Int)
+                        .Value = tamanhoPagina;
+
+                    using (var reader =
+                        command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var movimento =
+                                new Movimento
+                                {
+                                    Id = reader.GetInt32(
+                                        reader.GetOrdinal("Id")),
+
+                                    IdExterno =
+                                        reader["IdExterno"].ToString(),
+
+                                    Conta =
+                                        reader["Conta"].ToString(),
+
+                                    Tipo =
+                                        reader["Tipo"].ToString(),
+
+                                    Valor = reader.GetDecimal(
+                                        reader.GetOrdinal("Valor")),
+
+                                    DataMovimento =
+                                        reader.GetDateTime(
+                                            reader.GetOrdinal(
+                                                "DataMovimento")),
+
+                                    CriadoEm =
+                                        reader.GetDateTime(
+                                            reader.GetOrdinal(
+                                                "CriadoEm"))
+                                };
+
+                            resultado.Itens.Add(movimento);
+                        }
+
+                        if (reader.NextResult() &&
+                            reader.Read())
+                        {
+                            resultado.TotalRegistros =
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "TotalRegistros"));
+                        }
+                    }
+                }
+            }
+
+            return resultado;
+        }
     }
 }
 

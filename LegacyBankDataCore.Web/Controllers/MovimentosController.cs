@@ -23,6 +23,50 @@ namespace LegacyBankDataCore.Web.Controllers
         }
 
         [HttpGet]
+        [Route("api/movimentos/paginado")]
+        public IHttpActionResult ListarPaginado(
+            string termo = null,
+            string tipo = null,
+            int pagina = 1,
+            int tamanhoPagina = 10)
+                {
+            var repository =
+                new MovimentoRepository();
+
+            var service =
+                new MovimentoService(repository);
+
+            try
+            {
+                var resultado =
+                    service.ListarPaginado(
+                        termo,
+                        tipo,
+                        pagina,
+                        tamanhoPagina);
+
+                var totalPaginas =
+                    (int)Math.Ceiling(
+                        resultado.TotalRegistros /
+                        (double)tamanhoPagina);
+
+                return Ok(new
+                {
+                    Itens = resultado.Itens,
+                    TotalRegistros =
+                        resultado.TotalRegistros,
+                    Pagina = pagina,
+                    TamanhoPagina = tamanhoPagina,
+                    TotalPaginas = totalPaginas
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
         public IHttpActionResult Get(int id)
         {
             var repository = new MovimentoRepository();

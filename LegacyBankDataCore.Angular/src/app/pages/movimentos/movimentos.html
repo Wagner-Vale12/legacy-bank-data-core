@@ -6,69 +6,84 @@
   </div>
 </div>
 
-@if (carregando()) {
-  <div class="alert alert-info">Carregando movimentações...</div>
-}
-
 @if (erro()) {
   <div class="alert alert-danger">
     {{ erro() }}
   </div>
 }
 
-@if (!carregando() && !erro()) {
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white">
-      <strong>Filtros</strong>
-    </div>
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-white">
+    <strong>Filtros</strong>
+  </div>
 
-    <div class="card-body">
-      <div class="row g-3 align-items-end">
-        <div class="col-md-6">
-          <label for="busca" class="form-label"> Pesquisar </label>
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label for="busca" class="form-label"> Pesquisar </label>
 
-          <input
-            id="busca"
-            type="text"
-            class="form-control"
-            placeholder="ID Externo ou conta"
-            [value]="busca()"
-            (input)="atualizarBusca($event)"
-          />
-        </div>
+        <input
+          id="busca"
+          type="text"
+          class="form-control"
+          placeholder="ID Externo ou conta"
+          [value]="busca()"
+          (input)="atualizarBusca($event)"
+          (keyup.enter)="pesquisar()"
+        />
+      </div>
 
-        <div class="col-md-3">
-          <label for="tipo" class="form-label"> Tipo </label>
+      <div class="col-md-3">
+        <label for="tipo" class="form-label"> Tipo </label>
 
-          <select
-            id="tipo"
-            class="form-select"
-            [value]="tipoSelecionado()"
-            (change)="atualizarTipo($event)"
-          >
-            <option value="TODOS">Todos</option>
+        <select
+          id="tipo"
+          class="form-select"
+          [value]="tipoSelecionado()"
+          (change)="atualizarTipo($event)"
+        >
+          <option value="TODOS">Todos</option>
 
-            <option value="ENTRADA">Entrada</option>
+          <option value="ENTRADA">Entrada</option>
 
-            <option value="SAIDA">Saída</option>
-          </select>
-        </div>
+          <option value="SAIDA">Saída</option>
+        </select>
+      </div>
 
-        <div class="col-md-3">
-          <button type="button" class="btn btn-outline-secondary w-100" (click)="limparFiltros()">
-            Limpar filtros
-          </button>
-        </div>
+      <div class="col-md-2">
+        <button
+          type="button"
+          class="btn btn-primary w-100"
+          (click)="pesquisar()"
+          [disabled]="carregando()"
+        >
+          Pesquisar
+        </button>
+      </div>
+
+      <div class="col-md-2">
+        <button
+          type="button"
+          class="btn btn-outline-secondary w-100"
+          (click)="limparFiltros()"
+          [disabled]="carregando()"
+        >
+          Limpar
+        </button>
       </div>
     </div>
   </div>
+</div>
 
+@if (carregando()) {
+  <div class="alert alert-info">Carregando movimentações...</div>
+} @else if (!erro()) {
   <div class="card shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
       <strong> Movimentações processadas </strong>
 
       <span class="text-secondary small">
-        {{ movimentosFiltrados().length }}
+        {{ totalRegistros() }}
         registro(s)
       </span>
     </div>
@@ -88,7 +103,7 @@
         </thead>
 
         <tbody>
-          @for (movimento of movimentosPaginados(); track movimento.Id) {
+          @for (movimento of movimentos(); track movimento.Id) {
             <tr>
               <td>
                 {{ movimento.Id }}
@@ -131,11 +146,16 @@
       </table>
     </div>
 
-    @if (movimentosFiltrados().length > 0) {
+    @if (totalRegistros() > 0) {
       <div
         class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap gap-2"
       >
-        <small class="text-secondary"> Página {{ paginaAtual() }} de {{ totalPaginas() }} </small>
+        <small class="text-secondary">
+          Página
+          {{ paginaAtual() }}
+          de
+          {{ totalPaginas() }}
+        </small>
 
         <nav aria-label="Paginação das movimentações">
           <ul class="pagination pagination-sm mb-0">

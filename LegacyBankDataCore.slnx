@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
+    <File Path="15_SP_MOVIMENTO_LISTAR_PAGINADO.sql" />
     <File Path="Database/Scripts/01_Create_Movimento.sql" />
     <File Path="Database/Scripts/02_SP_MOVIMENTO_INSERIR.sql" />
     <File Path="Database/Scripts/03_SP_MOVIMENTO_LISTAR.sql" />

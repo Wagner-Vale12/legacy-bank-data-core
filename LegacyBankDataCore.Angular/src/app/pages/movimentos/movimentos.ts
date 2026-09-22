@@ -14,6 +14,7 @@ export class Movimentos implements OnInit {
   private readonly movimentosService = inject(MovimentosService);
 
   readonly movimentos = signal<Movimento[]>([]);
+
   readonly carregando = signal(true);
   readonly erro = signal<string | null>(null);
 
@@ -21,36 +22,10 @@ export class Movimentos implements OnInit {
   readonly tipoSelecionado = signal('TODOS');
 
   readonly paginaAtual = signal(1);
+  readonly totalRegistros = signal(0);
+  readonly totalPaginas = signal(0);
+
   readonly itensPorPagina = 10;
-
-  readonly movimentosFiltrados = computed(() => {
-    const termo = this.busca().trim().toLowerCase();
-
-    const tipo = this.tipoSelecionado();
-
-    return this.movimentos().filter((movimento) => {
-      const correspondeBusca =
-        !termo ||
-        movimento.IdExterno.toLowerCase().includes(termo) ||
-        movimento.Conta.toLowerCase().includes(termo);
-
-      const correspondeTipo = tipo === 'TODOS' || movimento.Tipo === tipo;
-
-      return correspondeBusca && correspondeTipo;
-    });
-  });
-
-  readonly totalPaginas = computed(() =>
-    Math.ceil(this.movimentosFiltrados().length / this.itensPorPagina),
-  );
-
-  readonly movimentosPaginados = computed(() => {
-    const inicio = (this.paginaAtual() - 1) * this.itensPorPagina;
-
-    const fim = inicio + this.itensPorPagina;
-
-    return this.movimentosFiltrados().slice(inicio, fim);
-  });
 
   readonly paginas = computed(() =>
     Array.from({ length: this.totalPaginas() }, (_, indice) => indice + 1),
@@ -64,27 +39,37 @@ export class Movimentos implements OnInit {
     this.carregando.set(true);
     this.erro.set(null);
 
-    this.movimentosService.listar().subscribe({
-      next: (movimentos) => {
-        this.movimentos.set(movimentos);
-        this.carregando.set(false);
-      },
+    this.movimentosService
+      .listarPaginado(this.busca(), this.tipoSelecionado(), this.paginaAtual(), this.itensPorPagina)
+      .subscribe({
+        next: (resposta) => {
+          this.movimentos.set(resposta.Itens);
+          this.totalRegistros.set(resposta.TotalRegistros);
+          this.totalPaginas.set(resposta.TotalPaginas);
+          this.paginaAtual.set(resposta.Pagina);
 
-      error: (erro) => {
-        console.error('Erro ao carregar movimentações:', erro);
+          this.carregando.set(false);
+        },
 
-        this.erro.set('Não foi possível carregar as movimentações.');
+        error: (erro) => {
+          console.error('Erro ao carregar movimentações:', erro);
 
-        this.carregando.set(false);
-      },
-    });
+          this.erro.set('Não foi possível carregar as movimentações.');
+
+          this.carregando.set(false);
+        },
+      });
   }
 
   atualizarBusca(event: Event): void {
     const input = event.target as HTMLInputElement;
 
     this.busca.set(input.value);
+  }
+
+  pesquisar(): void {
     this.paginaAtual.set(1);
+    this.carregarMovimentos();
   }
 
   atualizarTipo(event: Event): void {
@@ -92,20 +77,26 @@ export class Movimentos implements OnInit {
 
     this.tipoSelecionado.set(select.value);
     this.paginaAtual.set(1);
+
+    this.carregarMovimentos();
   }
 
   limparFiltros(): void {
     this.busca.set('');
     this.tipoSelecionado.set('TODOS');
     this.paginaAtual.set(1);
+
+    this.carregarMovimentos();
   }
 
   irParaPagina(pagina: number): void {
-    if (pagina < 1 || pagina > this.totalPaginas()) {
+    if (pagina < 1 || pagina > this.totalPaginas() || pagina === this.paginaAtual()) {
       return;
     }
 
     this.paginaAtual.set(pagina);
+
+    this.carregarMovimentos();
   }
 
   paginaAnterior(): void {
