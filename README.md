@@ -1,10 +1,10 @@
 # LegacyBankDataCore
 
-Projeto focado em **.NET Framework, ASP.NET MVC 5, Web API 2, SQL Server e processamento de arquivos XML**, simulando um fluxo de dados semelhante ao encontrado em aplicações corporativas e bancárias legadas.
+Projeto focado em **.NET Framework, ASP.NET MVC 5, Web API 2, SQL Server, processamento de arquivos XML e Angular**, simulando um fluxo de dados semelhante ao encontrado em aplicações corporativas e bancárias legadas.
 
 A aplicação recebe arquivos XML contendo movimentações financeiras, valida o layout e as regras de negócio, controla o processamento da importação e persiste os dados no SQL Server utilizando **ADO.NET e Stored Procedures**.
 
-O projeto foi desenvolvido para aprofundar conhecimentos em manutenção e evolução de aplicações .NET legadas, especialmente cenários envolvendo processamento de dados, transações, XML e integração com banco de dados.
+O frontend em **Angular 22 + Bootstrap** consome a Web API para acompanhar importações, visualizar erros, reprocessar arquivos, consultar movimentações e exibir indicadores em um dashboard.
 
 > Todos os dados utilizados no projeto são simulados.
 
@@ -23,6 +23,17 @@ O projeto foi desenvolvido para aprofundar conhecimentos em manutenção e evolu
 - Razor
 - Newtonsoft.Json
 
+### Frontend
+
+- Angular 22
+- TypeScript
+- Angular Router
+- HttpClient
+- Signals
+- Computed Signals
+- RxJS
+- Bootstrap 5
+
 ### Banco de dados
 
 - SQL Server
@@ -31,47 +42,49 @@ O projeto foi desenvolvido para aprofundar conhecimentos em manutenção e evolu
 - Transactions
 - Commit / Rollback
 
-### XML
+### Processamento de arquivos
 
+- XML
 - XDocument
 - XmlReader
 - XSD
 - SHA-256
 
-### Testes
+### Testes e ambiente
 
 - MSTest
-
-### Ambiente
-
 - Visual Studio
+- Visual Studio Code
 - IIS Express
+- Node.js
+- npm
 - NuGet
-- packages.config
 
 ---
 
 ## Arquitetura
 
-O backend utiliza uma separação simples entre Controller, Service e Repository.
+O backend utiliza uma separação entre Controller, Service e Repository.
 
 ```text
-HTTP Request
-     ↓
+Angular
+   ↓
+ASP.NET Web API 2
+   ↓
 Controller
-     ↓
+   ↓
 Service
-     ↓
+   ↓
 Repository
-     ↓
+   ↓
 ADO.NET
-     ↓
-Stored Procedure
-     ↓
+   ↓
+Stored Procedures
+   ↓
 SQL Server
 ```
 
-Para processamento de arquivos XML:
+O processamento dos arquivos XML segue o fluxo:
 
 ```text
 Arquivo XML
@@ -97,24 +110,23 @@ SQL Server
 
 ## Funcionalidades
 
-O backend atualmente possui:
+### Backend
 
 - cadastro e consulta de movimentações;
-- controle de importações;
 - processamento de arquivos XML;
 - validação de XML através de XSD;
 - detecção de XML malformado;
 - validações de negócio;
-- controle de status da importação;
+- controle do status das importações;
 - idempotência através de SHA-256;
 - prevenção de arquivos duplicados;
 - transações com Commit e Rollback;
 - reprocessamento controlado de importações com erro;
 - tratamento global de exceções;
-- endpoints REST para consulta das importações;
+- endpoints REST;
 - testes automatizados.
 
-Estados utilizados durante o processamento:
+Fluxo normal da importação:
 
 ```text
 RECEBIDA
@@ -131,6 +143,53 @@ PROCESSANDO
    ↓
 ERRO
 ```
+
+Importações com erro podem ser reprocessadas:
+
+```text
+ERRO
+ ↓
+PROCESSANDO
+ ↓
+CONCLUIDA
+```
+
+### Frontend
+
+O frontend atualmente possui três áreas principais:
+
+**Dashboard**
+
+- total de importações;
+- importações concluídas;
+- importações com erro;
+- importações em processamento;
+- total de movimentações;
+- quantidade e valor de entradas;
+- quantidade e valor de saídas;
+- últimas importações processadas.
+
+**Importações**
+
+- listagem das importações;
+- status visual através de badges;
+- visualização dos detalhes;
+- mensagens de erro do processamento;
+- reprocessamento de importações com status `ERRO`;
+- confirmação antes do reprocessamento;
+- feedback de sucesso ou falha;
+- atualização automática da listagem.
+
+**Movimentações**
+
+- consulta das movimentações processadas;
+- identificação de `ENTRADA` e `SAIDA`;
+- valores formatados em Real brasileiro;
+- pesquisa por ID externo;
+- pesquisa por conta;
+- filtro por tipo;
+- contador de resultados;
+- limpeza dos filtros.
 
 ---
 
@@ -175,9 +234,6 @@ LegacyBankDataCore
 │
 ├── LegacyBankDataCore.Web
 │   ├── App_Data
-│   │   ├── Importacoes
-│   │   └── Schemas
-│   │
 │   ├── App_Start
 │   ├── Controllers
 │   ├── Exceptions
@@ -190,6 +246,16 @@ LegacyBankDataCore
 │   └── Web.config
 │
 ├── LegacyBankDataCore.Tests
+│
+├── LegacyBankDataCore.Angular
+│   └── src
+│       └── app
+│           ├── core
+│           ├── models
+│           └── pages
+│               ├── dashboard
+│               ├── importacoes
+│               └── movimentos
 │
 └── LegacyBankDataCore.slnx
 ```
@@ -205,21 +271,17 @@ Tenha instalado:
 - Visual Studio com suporte a ASP.NET / .NET Framework;
 - .NET Framework 4.7.2;
 - SQL Server ou SQL Server Express;
-- SQL Server Management Studio.
+- SQL Server Management Studio;
+- Node.js;
+- npm;
+- Angular CLI.
 
 ### 1. Clone o repositório
 
 ```bash
 git clone https://github.com/Wagner-Vale12/legacy-bank-data-core.git
-```
-
-Entre na pasta:
-
-```bash
 cd legacy-bank-data-core
 ```
-
----
 
 ### 2. Configure o banco
 
@@ -229,15 +291,13 @@ Crie o banco:
 CREATE DATABASE LegacyBankDataCore;
 ```
 
-Depois execute os scripts localizados em:
+Execute os scripts da pasta:
 
 ```text
 Database/Scripts
 ```
 
 seguindo a ordem numérica.
-
----
 
 ### 3. Configure a connection string
 
@@ -247,9 +307,9 @@ No arquivo:
 LegacyBankDataCore.Web/Web.config
 ```
 
-ajuste a connection string conforme sua instalação do SQL Server.
+configure sua instância do SQL Server.
 
-Exemplo utilizando SQL Server Express:
+Exemplo:
 
 ```xml
 <connectionStrings>
@@ -260,9 +320,7 @@ Exemplo utilizando SQL Server Express:
 </connectionStrings>
 ```
 
----
-
-### 4. Abra a solução
+### 4. Execute o backend
 
 Abra:
 
@@ -272,19 +330,37 @@ LegacyBankDataCore.slnx
 
 no Visual Studio.
 
-Restaure os pacotes NuGet caso necessário.
+Defina `LegacyBankDataCore.Web` como projeto de inicialização e execute utilizando **IIS Express**.
 
-Depois execute utilizando:
+Exemplo:
 
 ```text
-IIS Express
+https://localhost:44318
 ```
+
+### 5. Execute o frontend
+
+Em outro terminal:
+
+```bash
+cd LegacyBankDataCore.Angular
+npm install
+ng serve --proxy-config proxy.conf.json
+```
+
+Acesse:
+
+```text
+http://localhost:4200
+```
+
+O proxy de desenvolvimento encaminha as requisições `/api` do Angular para a Web API .NET.
 
 ---
 
 ## Testes
 
-O projeto possui uma suíte MSTest cobrindo partes importantes do processamento.
+O projeto possui testes automatizados com MSTest cobrindo cenários importantes do processamento.
 
 Entre os cenários testados estão:
 
@@ -302,13 +378,23 @@ Estado atual:
 0 falhas
 ```
 
+Também foram realizados testes manuais de integração envolvendo:
+
+- processamento de XML;
+- transações;
+- Commit e Rollback;
+- falha durante a conclusão;
+- reprocessamento;
+- idempotência;
+- integração Angular → Web API → SQL Server.
+
 ---
 
 ## Decisões técnicas
 
-### ADO.NET antes de Dapper
+### ADO.NET
 
-O acesso ao banco foi implementado inicialmente com ADO.NET para aprofundar o entendimento de:
+O acesso ao banco foi implementado inicialmente com ADO.NET para aprofundar conhecimentos sobre:
 
 ```text
 SqlConnection
@@ -322,39 +408,29 @@ Dapper poderá ser introduzido posteriormente como evolução da camada de persi
 
 ### Stored Procedures
 
-O acesso aos principais dados utiliza Stored Procedures para reproduzir um cenário comum em sistemas corporativos legados.
+As principais operações de banco utilizam Stored Procedures, reproduzindo um cenário comum em aplicações corporativas legadas.
 
-### SHA-256 para idempotência
+### SHA-256
 
-Cada arquivo recebe um hash SHA-256.
+Cada arquivo recebe um hash SHA-256 utilizado para identificar conteúdos já registrados e auxiliar no controle de idempotência.
 
-Isso permite identificar tentativas de processamento do mesmo conteúdo e evitar importações duplicadas.
-
-### Transação no processamento
+### Transactions
 
 A persistência dos movimentos e a conclusão da importação fazem parte da mesma transação.
 
-Em caso de falha:
+Em caso de falha, é executado:
 
 ```text
 ROLLBACK
 ```
 
-é executado para impedir persistência parcial.
+evitando persistência parcial.
 
-### Reprocessamento
+### Angular
 
-Importações com status `ERRO` podem ser reprocessadas utilizando o mesmo registro de importação.
+O frontend utiliza **Signals** para gerenciamento de estado e `computed()` para informações derivadas, como indicadores do dashboard e resultados filtrados.
 
-```text
-ERRO
- ↓
-PROCESSANDO
- ↓
-CONCLUIDA
-```
-
-O hash original também é utilizado para verificar se o conteúdo do arquivo foi alterado.
+As chamadas HTTP ficam centralizadas em services utilizando `HttpClient`.
 
 ---
 
@@ -362,9 +438,7 @@ O hash original também é utilizado para verificar se o conteúdo do arquivo fo
 
 ### Backend
 
-✅ Backend concluído para o escopo atual do projeto.
-
-Implementado:
+✅ Concluído para o escopo atual.
 
 ```text
 Web API 2
@@ -384,31 +458,37 @@ Testes automatizados
 
 ### Frontend
 
-🚧 Próxima etapa:
+✅ Funcional para o escopo atual.
 
 ```text
-Angular
-+
+Angular 22
 Bootstrap
+Routing
+HttpClient
+Signals
+Dashboard
+Importações
+Detalhes e erros
+Reprocessamento
+Movimentações
+Pesquisa e filtros
+Formatação BRL
+Integração com Web API
 ```
-
-O frontend consumirá a Web API já existente para apresentar importações, movimentações, erros e ações de reprocessamento.
 
 ---
 
 ## Próximas evoluções
 
-- Angular;
-- Bootstrap;
-- dashboard;
-- tela de importações;
-- tela de movimentações;
-- detalhes de processamento;
-- reprocessamento pela interface;
+- refinamento visual e responsividade;
+- paginação;
+- filtros server-side;
 - ampliação da cobertura de testes;
-- Dependency Injection;
+- Dependency Injection no backend;
 - Dapper;
-- configuração por ambiente.
+- configuração por ambiente;
+- melhorias de logging e observabilidade;
+- preparação para publicação em IIS.
 
 ---
 
