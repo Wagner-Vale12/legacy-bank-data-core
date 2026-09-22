@@ -310,5 +310,118 @@ namespace LegacyBankDataCore.Web.Repositories
 
             return importacoes;
         }
+        public ImportacaoPaginadoResult ListarPaginado(
+    string termo,
+    string status,
+    int pagina,
+    int tamanhoPagina)
+        {
+            var connectionString =
+                ConfigurationManager
+                    .ConnectionStrings["LegacyBankDataCore"]
+                    .ConnectionString;
+
+            var resultado =
+                new ImportacaoPaginadoResult();
+
+            using (var connection =
+                new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand(
+                    "dbo.SP_IMPORTACAO_LISTAR_PAGINADO",
+                    connection))
+                {
+                    command.CommandType =
+                        CommandType.StoredProcedure;
+
+                    command.Parameters
+                        .Add("@Termo", SqlDbType.VarChar, 255)
+                        .Value =
+                            string.IsNullOrWhiteSpace(termo)
+                                ? (object)DBNull.Value
+                                : termo;
+
+                    command.Parameters
+                        .Add("@Status", SqlDbType.VarChar, 20)
+                        .Value =
+                            string.IsNullOrWhiteSpace(status)
+                                ? (object)DBNull.Value
+                                : status;
+
+                    command.Parameters
+                        .Add("@Pagina", SqlDbType.Int)
+                        .Value = pagina;
+
+                    command.Parameters
+                        .Add("@TamanhoPagina", SqlDbType.Int)
+                        .Value = tamanhoPagina;
+
+                    using (var reader =
+                        command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultado.Itens.Add(
+                                new Importacao
+                                {
+                                    Id = reader.GetInt32(
+                                        reader.GetOrdinal("Id")),
+
+                                    NomeArquivo =
+                                        reader["NomeArquivo"].ToString(),
+
+                                    Status =
+                                        reader["Status"].ToString(),
+
+                                    TotalRegistros =
+                                        reader.GetInt32(
+                                            reader.GetOrdinal(
+                                                "TotalRegistros")),
+
+                                    DataRecebimento =
+                                        reader.GetDateTime(
+                                            reader.GetOrdinal(
+                                                "DataRecebimento")),
+
+                                    DataProcessamento =
+                                        reader["DataProcessamento"] ==
+                                        DBNull.Value
+                                            ? (DateTime?)null
+                                            : reader.GetDateTime(
+                                                reader.GetOrdinal(
+                                                    "DataProcessamento")),
+
+                                    MensagemErro =
+                                        reader["MensagemErro"] ==
+                                        DBNull.Value
+                                            ? null
+                                            : reader["MensagemErro"]
+                                                .ToString(),
+
+                                    HashArquivo =
+                                        reader["HashArquivo"] ==
+                                        DBNull.Value
+                                            ? null
+                                            : reader["HashArquivo"]
+                                                .ToString()
+                                });
+                        }
+
+                        if (reader.NextResult() &&
+                            reader.Read())
+                        {
+                            resultado.TotalRegistros =
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "TotalRegistros"));
+                        }
+                    }
+                }
+            }
+
+            return resultado;
+        }
     }
 }

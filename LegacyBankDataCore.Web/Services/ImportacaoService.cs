@@ -160,6 +160,61 @@ namespace LegacyBankDataCore.Web.Services
         {
             return _repository.Listar();
         }
+
+        public ImportacaoPaginadoResult ListarPaginado(
+            string termo,
+            string status,
+            int pagina,
+            int tamanhoPagina)
+                {
+            if (pagina < 1)
+            {
+                throw new ArgumentException(
+                    "Página deve ser maior ou igual a 1.");
+            }
+
+            if (tamanhoPagina < 1 || tamanhoPagina > 100)
+            {
+                throw new ArgumentException(
+                    "Tamanho da página deve estar entre 1 e 100.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(termo))
+            {
+                termo = termo.Trim();
+
+                if (termo.Length > 255)
+                {
+                    throw new ArgumentException(
+                        "Termo de pesquisa deve possuir no máximo 255 caracteres.");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                status = status.Trim().ToUpperInvariant();
+
+                if (status == "TODOS")
+                {
+                    status = null;
+                }
+                else if (
+                    status != "RECEBIDA" &&
+                    status != "PROCESSANDO" &&
+                    status != "CONCLUIDA" &&
+                    status != "ERRO")
+                {
+                    throw new ArgumentException(
+                        "Status inválido.");
+                }
+            }
+
+            return _repository.ListarPaginado(
+                termo,
+                status,
+                pagina,
+                tamanhoPagina);
+        }
     }
         
 }

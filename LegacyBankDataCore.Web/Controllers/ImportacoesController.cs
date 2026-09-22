@@ -394,5 +394,48 @@ namespace LegacyBankDataCore.Web.Controllers
 
             return Ok(importacoes);
         }
+        [HttpGet]
+        [Route("api/importacoes/paginado")]
+        public IHttpActionResult ListarPaginado(
+            string termo = null,
+            string status = null,
+            int pagina = 1,
+            int tamanhoPagina = 10)
+                {
+            var repository =
+                new ImportacaoRepository();
+
+            var service =
+                new ImportacaoService(repository);
+
+            try
+            {
+                var resultado =
+                    service.ListarPaginado(
+                        termo,
+                        status,
+                        pagina,
+                        tamanhoPagina);
+
+                var totalPaginas =
+                    (int)Math.Ceiling(
+                        resultado.TotalRegistros /
+                        (double)tamanhoPagina);
+
+                return Ok(new
+                {
+                    Itens = resultado.Itens,
+                    TotalRegistros =
+                        resultado.TotalRegistros,
+                    Pagina = pagina,
+                    TamanhoPagina = tamanhoPagina,
+                    TotalPaginas = totalPaginas
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
