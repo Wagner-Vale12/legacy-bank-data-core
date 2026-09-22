@@ -20,6 +20,9 @@ export class Movimentos implements OnInit {
   readonly busca = signal('');
   readonly tipoSelecionado = signal('TODOS');
 
+  readonly paginaAtual = signal(1);
+  readonly itensPorPagina = 10;
+
   readonly movimentosFiltrados = computed(() => {
     const termo = this.busca().trim().toLowerCase();
 
@@ -36,6 +39,22 @@ export class Movimentos implements OnInit {
       return correspondeBusca && correspondeTipo;
     });
   });
+
+  readonly totalPaginas = computed(() =>
+    Math.ceil(this.movimentosFiltrados().length / this.itensPorPagina),
+  );
+
+  readonly movimentosPaginados = computed(() => {
+    const inicio = (this.paginaAtual() - 1) * this.itensPorPagina;
+
+    const fim = inicio + this.itensPorPagina;
+
+    return this.movimentosFiltrados().slice(inicio, fim);
+  });
+
+  readonly paginas = computed(() =>
+    Array.from({ length: this.totalPaginas() }, (_, indice) => indice + 1),
+  );
 
   ngOnInit(): void {
     this.carregarMovimentos();
@@ -65,17 +84,36 @@ export class Movimentos implements OnInit {
     const input = event.target as HTMLInputElement;
 
     this.busca.set(input.value);
+    this.paginaAtual.set(1);
   }
 
   atualizarTipo(event: Event): void {
     const select = event.target as HTMLSelectElement;
 
     this.tipoSelecionado.set(select.value);
+    this.paginaAtual.set(1);
   }
 
   limparFiltros(): void {
     this.busca.set('');
     this.tipoSelecionado.set('TODOS');
+    this.paginaAtual.set(1);
+  }
+
+  irParaPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas()) {
+      return;
+    }
+
+    this.paginaAtual.set(pagina);
+  }
+
+  paginaAnterior(): void {
+    this.irParaPagina(this.paginaAtual() - 1);
+  }
+
+  proximaPagina(): void {
+    this.irParaPagina(this.paginaAtual() + 1);
   }
 
   classeTipo(tipo: string): string {

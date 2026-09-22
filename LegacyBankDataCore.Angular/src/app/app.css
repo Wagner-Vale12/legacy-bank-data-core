@@ -1,0 +1,32 @@
+.app-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-nav-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .app-navbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .navbar-brand {
+    text-align: center;
+  }
+
+  .app-nav-actions {
+    width: 100%;
+  }
+
+  .app-nav-actions .btn {
+    flex: 1;
+    min-width: 110px;
+  }
+}

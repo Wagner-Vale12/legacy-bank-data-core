@@ -88,7 +88,7 @@
         </thead>
 
         <tbody>
-          @for (movimento of movimentosFiltrados(); track movimento.Id) {
+          @for (movimento of movimentosPaginados(); track movimento.Id) {
             <tr>
               <td>
                 {{ movimento.Id }}
@@ -130,5 +130,47 @@
         </tbody>
       </table>
     </div>
+
+    @if (movimentosFiltrados().length > 0) {
+      <div
+        class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap gap-2"
+      >
+        <small class="text-secondary"> Página {{ paginaAtual() }} de {{ totalPaginas() }} </small>
+
+        <nav aria-label="Paginação das movimentações">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="paginaAtual() === 1">
+              <button
+                type="button"
+                class="page-link"
+                (click)="paginaAnterior()"
+                [disabled]="paginaAtual() === 1"
+              >
+                Anterior
+              </button>
+            </li>
+
+            @for (pagina of paginas(); track pagina) {
+              <li class="page-item" [class.active]="paginaAtual() === pagina">
+                <button type="button" class="page-link" (click)="irParaPagina(pagina)">
+                  {{ pagina }}
+                </button>
+              </li>
+            }
+
+            <li class="page-item" [class.disabled]="paginaAtual() === totalPaginas()">
+              <button
+                type="button"
+                class="page-link"
+                (click)="proximaPagina()"
+                [disabled]="paginaAtual() === totalPaginas()"
+              >
+                Próxima
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    }
   </div>
 }

@@ -9,3 +9,35 @@ body {
 body {
   background-color: #f5f6f8;
 }
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+.table td {
+  white-space: nowrap;
+}
+
+.card {
+  border: 0;
+}
+
+@media (max-width: 767px) {
+  main.container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  h1.h3 {
+    font-size: 1.5rem;
+  }
+}
