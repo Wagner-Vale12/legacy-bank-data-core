@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend Build and Tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v3
+
+      - name: Restore NuGet packages
+        run: |
+          nuget restore LegacyBankDataCore.Web\packages.config -PackagesDirectory packages
+          nuget restore LegacyBankDataCore.Tests\packages.config -PackagesDirectory packages
+
+      - name: Build Web project
+        run: >
+          msbuild
+          LegacyBankDataCore.Web\LegacyBankDataCore.Web.csproj
+          /p:Configuration=Release
+          /p:Platform="AnyCPU"
+          /m
+
+      - name: Build Test project
+        run: >
+          msbuild
+          LegacyBankDataCore.Tests\LegacyBankDataCore.Tests.csproj
+          /p:Configuration=Release
+          /p:Platform="AnyCPU"
+          /m
+
+      - name: Run MSTest tests
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          $visualStudioPath = & $vswhere `
+            -latest `
+            -products * `
+            -property installationPath
+
+          $vstest = Join-Path `
+            $visualStudioPath `
+            "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
+
+          if (-not (Test-Path $vstest)) {
+            throw "vstest.console.exe was not found."
+          }
+
+          & $vstest `
+            "LegacyBankDataCore.Tests\bin\Release\LegacyBankDataCore.Tests.dll" `
+            "/TestAdapterPath:packages\MSTest.TestAdapter.2.2.10\build\_common"
+
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+  frontend:
+    name: Angular Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: LegacyBankDataCore.Angular
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: LegacyBankDataCore.Angular/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular
+        run: npm run build
