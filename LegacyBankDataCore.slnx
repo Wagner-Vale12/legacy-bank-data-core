@@ -1,8 +1,8 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
-    <File Path="15_SP_MOVIMENTO_LISTAR_PAGINADO.sql" />
-    <File Path="16_SP_IMPORTACAO_LISTAR_PAGINADO.sql" />
+    <File Path="Database/Scripts/15_SP_MOVIMENTO_LISTAR_PAGINADO.sql" />
+    <File Path="Database/Scripts/16_SP_IMPORTACAO_LISTAR_PAGINADO.sql" />
     <File Path="Database/Scripts/01_Create_Movimento.sql" />
     <File Path="Database/Scripts/02_SP_MOVIMENTO_INSERIR.sql" />
     <File Path="Database/Scripts/03_SP_MOVIMENTO_LISTAR.sql" />
@@ -21,3 +21,4 @@
   <Project Path="LegacyBankDataCore.Tests/LegacyBankDataCore.Tests.csproj" Id="3c3b3736-bf26-45ff-8842-0c1f39131e8a" />
   <Project Path="LegacyBankDataCore.Web/LegacyBankDataCore.Web.csproj" Id="0a72437f-41cd-436d-bf65-f92eb731c7d3" />
 </Solution>
+
