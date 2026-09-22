@@ -1,12 +1,134 @@
-<div class="mb-4">
-  <h1 class="h3">Movimentações</h1>
-  <p class="text-secondary">
-    Consulta das movimentações financeiras processadas.
-  </p>
-</div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Movimentações</h1>
 
-<div class="card shadow-sm">
-  <div class="card-body">
-    Lista de movimentações será exibida aqui.
+    <p class="text-secondary mb-0">Consulta das movimentações financeiras processadas.</p>
   </div>
 </div>
+
+@if (carregando()) {
+  <div class="alert alert-info">Carregando movimentações...</div>
+}
+
+@if (erro()) {
+  <div class="alert alert-danger">
+    {{ erro() }}
+  </div>
+}
+
+@if (!carregando() && !erro()) {
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <strong>Filtros</strong>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+          <label for="busca" class="form-label"> Pesquisar </label>
+
+          <input
+            id="busca"
+            type="text"
+            class="form-control"
+            placeholder="ID Externo ou conta"
+            [value]="busca()"
+            (input)="atualizarBusca($event)"
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label for="tipo" class="form-label"> Tipo </label>
+
+          <select
+            id="tipo"
+            class="form-select"
+            [value]="tipoSelecionado()"
+            (change)="atualizarTipo($event)"
+          >
+            <option value="TODOS">Todos</option>
+
+            <option value="ENTRADA">Entrada</option>
+
+            <option value="SAIDA">Saída</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <button type="button" class="btn btn-outline-secondary w-100" (click)="limparFiltros()">
+            Limpar filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <strong> Movimentações processadas </strong>
+
+      <span class="text-secondary small">
+        {{ movimentosFiltrados().length }}
+        registro(s)
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>ID Externo</th>
+            <th>Conta</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Data Movimento</th>
+            <th>Criado em</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (movimento of movimentosFiltrados(); track movimento.Id) {
+            <tr>
+              <td>
+                {{ movimento.Id }}
+              </td>
+
+              <td>
+                {{ movimento.IdExterno }}
+              </td>
+
+              <td>
+                {{ movimento.Conta }}
+              </td>
+
+              <td>
+                <span class="badge" [class]="classeTipo(movimento.Tipo)">
+                  {{ movimento.Tipo }}
+                </span>
+              </td>
+
+              <td>
+                {{ movimento.Valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+              </td>
+
+              <td>
+                {{ movimento.DataMovimento | date: 'dd/MM/yyyy' }}
+              </td>
+
+              <td>
+                {{ movimento.CriadoEm | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center text-secondary py-4">
+                Nenhuma movimentação encontrada para os filtros informados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

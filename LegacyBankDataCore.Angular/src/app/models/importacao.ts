@@ -1,5 +1,6 @@
 export interface Importacao {
   Id: number;
+  IdExtremo: string;
   NomeArquivo: string;
   Status: string;
   TotalRegistros: number;

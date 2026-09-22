@@ -1,8 +1,172 @@
 <div class="mb-4">
-  <h1 class="h3">Dashboard</h1>
-  <p class="text-secondary">Visão geral do processamento de dados.</p>
+  <h1 class="h3 mb-1">Dashboard</h1>
+
+  <p class="text-secondary mb-0">Visão geral do processamento de dados.</p>
 </div>
 
-<div class="card shadow-sm">
-  <div class="card-body">Dashboard do LegacyBankDataCore.</div>
-</div>
+@if (carregando()) {
+  <div class="alert alert-info">Carregando dashboard...</div>
+}
+
+@if (erro()) {
+  <div class="alert alert-danger">
+    {{ erro() }}
+  </div>
+}
+
+@if (!carregando() && !erro()) {
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Total de importações</div>
+
+          <div class="fs-3 fw-semibold">
+            {{ totalImportacoes() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Concluídas</div>
+
+          <div class="fs-3 fw-semibold text-success">
+            {{ importacoesConcluidas() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Com erro</div>
+
+          <div class="fs-3 fw-semibold text-danger">
+            {{ importacoesComErro() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Processando</div>
+
+          <div class="fs-3 fw-semibold text-warning">
+            {{ importacoesProcessando() }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Total de movimentações</div>
+
+          <div class="fs-3 fw-semibold">
+            {{ totalMovimentos() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Entradas</div>
+
+          <div class="fs-5 fw-semibold text-success">{{ totalEntradas() }} registros</div>
+
+          <div class="mt-2">
+            {{ valorEntradas() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Saídas</div>
+
+          <div class="fs-5 fw-semibold text-danger">{{ totalSaidas() }} registros</div>
+
+          <div class="mt-2">
+            {{ valorSaidas() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <strong> Últimas importações </strong>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Arquivo</th>
+            <th>Status</th>
+            <th>Registros</th>
+            <th>Recebimento</th>
+            <th>Processamento</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (importacao of ultimasImportacoes(); track importacao.Id) {
+            <tr>
+              <td>
+                {{ importacao.Id }}
+              </td>
+
+              <td>
+                {{ importacao.NomeArquivo }}
+              </td>
+
+              <td>
+                <span class="badge" [class]="classeStatus(importacao.Status)">
+                  {{ importacao.Status }}
+                </span>
+              </td>
+
+              <td>
+                {{ importacao.TotalRegistros }}
+              </td>
+
+              <td>
+                {{ importacao.DataRecebimento | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+
+              <td>
+                @if (importacao.DataProcessamento) {
+                  {{ importacao.DataProcessamento | date: 'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  -
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center text-secondary py-4">
+                Nenhuma importação encontrada.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
