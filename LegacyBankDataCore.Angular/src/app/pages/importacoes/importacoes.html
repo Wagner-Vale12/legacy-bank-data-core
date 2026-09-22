@@ -1,0 +1,201 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Importações</h1>
+
+    <p class="text-secondary mb-0">Acompanhamento dos arquivos XML processados.</p>
+  </div>
+</div>
+
+@if (carregando()) {
+  <div class="alert alert-info">Carregando importações...</div>
+}
+
+@if (erro()) {
+  <div class="alert alert-danger">
+    {{ erro() }}
+  </div>
+}
+
+@if (mensagemSucesso()) {
+  <div class="alert alert-success">
+    {{ mensagemSucesso() }}
+  </div>
+}
+
+@if (erroReprocessamento()) {
+  <div class="alert alert-danger">
+    <strong>Falha no reprocessamento.</strong>
+
+    <div class="mt-1">
+      {{ erroReprocessamento() }}
+    </div>
+  </div>
+}
+
+@if (!carregando() && !erro()) {
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <strong>Histórico de importações</strong>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Arquivo</th>
+            <th>Status</th>
+            <th>Registros</th>
+            <th>Recebimento</th>
+            <th>Processamento</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (importacao of importacoes(); track importacao.Id) {
+            <tr [class.table-active]="importacaoSelecionada()?.Id === importacao.Id">
+              <td>
+                {{ importacao.Id }}
+              </td>
+
+              <td>
+                {{ importacao.NomeArquivo }}
+              </td>
+
+              <td>
+                <span class="badge" [class]="classeStatus(importacao.Status)">
+                  {{ importacao.Status }}
+                </span>
+              </td>
+
+              <td>
+                {{ importacao.TotalRegistros }}
+              </td>
+
+              <td>
+                {{ importacao.DataRecebimento | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+
+              <td>
+                @if (importacao.DataProcessamento) {
+                  {{ importacao.DataProcessamento | date: 'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  -
+                }
+              </td>
+
+              <td class="text-nowrap">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="verDetalhes(importacao)"
+                >
+                  Detalhes
+                </button>
+
+                @if (importacao.Status === 'ERRO') {
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning ms-2"
+                    [disabled]="reprocessandoId() !== null"
+                    (click)="reprocessar(importacao)"
+                  >
+                    @if (reprocessandoId() === importacao.Id) {
+                      Processando...
+                    } @else {
+                      Reprocessar
+                    }
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center text-secondary py-4">
+                Nenhuma importação encontrada.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (importacaoSelecionada(); as selecionada) {
+    <div #detalhesCard class="card shadow-sm mt-4">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <strong> Detalhes da importação #{{ selecionada.Id }} </strong>
+
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Fechar"
+          (click)="fecharDetalhes()"
+        ></button>
+      </div>
+
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <strong>Arquivo</strong>
+
+            <div>
+              {{ selecionada.NomeArquivo }}
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <strong>Status</strong>
+
+            <div>
+              <span class="badge" [class]="classeStatus(selecionada.Status)">
+                {{ selecionada.Status }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <strong>Total de registros</strong>
+
+            <div>
+              {{ selecionada.TotalRegistros }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <strong>Recebimento</strong>
+
+            <div>
+              {{ selecionada.DataRecebimento | date: 'dd/MM/yyyy HH:mm:ss' }}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <strong>Processamento</strong>
+
+            <div>
+              @if (selecionada.DataProcessamento) {
+                {{ selecionada.DataProcessamento | date: 'dd/MM/yyyy HH:mm:ss' }}
+              } @else {
+                -
+              }
+            </div>
+          </div>
+
+          @if (selecionada.MensagemErro) {
+            <div class="col-12">
+              <div class="alert alert-danger mb-0">
+                <strong>Erro de processamento</strong>
+
+                <div class="mt-2">
+                  {{ selecionada.MensagemErro }}
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+}

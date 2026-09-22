@@ -1,0 +1,23 @@
+<nav class="navbar navbar-dark bg-dark shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" routerLink="/dashboard"> LegacyBankDataCore </a>
+
+    <div class="d-flex gap-2">
+      <a class="btn btn-sm btn-outline-light" routerLink="/dashboard" routerLinkActive="active">
+        Dashboard
+      </a>
+
+      <a class="btn btn-sm btn-outline-light" routerLink="/importacoes" routerLinkActive="active">
+        Importações
+      </a>
+
+      <a class="btn btn-sm btn-outline-light" routerLink="/movimentos" routerLinkActive="active">
+        Movimentações
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <router-outlet />
+</main>
